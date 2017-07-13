@@ -18,7 +18,7 @@ function [partition, codebook, distor, rel_distor] = mylloyds(bit, tol, plot_fla
 %   relative distortion value in terminating the computation.
 
 %   Written by Bin Hu, learned from lloyds.m (Copyright 1996-2005 The MathWorks, Inc.) in MATLAB.
-%   $Revision: 1.0.0.0 $ $Date: 2017/07/12 $
+%   $Revision: 1.0.0.1 $ $Date: 2017/07/13 $
 
 % validation verification and format conversion.
 error(nargchk(1,3,nargin, 'struct'));
@@ -68,6 +68,7 @@ while (rel_distor > tol) && (rel_distor > ter_cond2)
     partition_half = (codebook_half(2 : len_codebook_half) + codebook_half(1 : len_codebook_half-1)) / 2;
 
     % compute distortion
+    last_distor = distor;
     distor = 0;
     partition_half_ex = [0, partition_half, inf];
     for ii = 1 : len_codebook_half
