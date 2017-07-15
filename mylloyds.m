@@ -1,14 +1,16 @@
-function [partition, codebook, distor, rel_distor] = mylloyds(bit, tol, plot_flag)
+function [partition, codebook, distor, rel_distor] = mylloyds(bit, ini_codebook, tol, plot_flag)
 %MYLLOYDS Optimize quantization parameters for the standard Gaussian distribution by using the Lloyd algorithm.
-%   [PARTITION, CODEBOOK] = MYLLOYDS(BIT) optimizes the
+%   [PARTITION, CODEBOOK] = MYLLOYDS(BIT, INI_CODEBOOK) optimizes the
 %   scalar quantization PARTITION and CODEBOOK based on the standard
 %   Gaussian distribution using the Lloyd algorithm.
-%   BIT is the bit of quantization and should be a scalar positive integer. The optimized
-%   CODEBOOK is a vector of length equal to 2^BIT. PARTITION is a vector of
+%   BIT is the bit of quantization and should be a scalar positive integer.
+%   INI_CODEBOOK is the initial guess of the codebook values and should be
+%   a vector of length equal to 2^BIT. The optimized
+%   CODEBOOK has the same vector size as INI_CODEBOOK. PARTITION is a vector of
 %   length equal to 2^BIT minus 1. The optimization will be terminated if the relative distortion
 %   is less than 10^(-7).
 %
-%   [PARTITION, CODEBOOK] = MYLLOYDS(BIT, TOL) provides the
+%   [PARTITION, CODEBOOK] = MYLLOYDS(BIT, INI_CODEBOOK, TOL) provides the
 %   tolerance in the optimization.
 %
 %   [PARTITION, CODEBOOK, DISTORTION] = MYLLOYDS(...) outputs the final distortion
@@ -17,28 +19,37 @@ function [partition, codebook, distor, rel_distor] = mylloyds(bit, tol, plot_fla
 %   [PARTITION, CODEBOOK, DISTORTION, REL_DISTORTION] = MYLLOYDS(...) outputs the
 %   relative distortion value in terminating the computation.
 
-%   Written by Bin Hu, learned from lloyds.m (Copyright 1996-2005 The MathWorks, Inc.) in MATLAB.
-%   $Revision: 1.0.0.1 $ $Date: 2017/07/13 $
+%   Written by Bin Hu in MATLAB R2014a, learned from lloyds.m (Copyright 1996-2005 The MathWorks, Inc.) in MATLAB.
+%   $Revision: 1.1.0.0 $ $Date: 2017/07/15 $
 
 % validation verification and format conversion.
-error(nargchk(1,3,nargin, 'struct'));
+narginchk(1,4);
 
-if length(bit) < 1
+if isempty(bit)
     error('mylloyds:EmptyBIT','Bit parameter cannot be empty.');
-elseif (min(size(bit)) > 1) || (max(size(bit)) > 1)
+elseif ~isscalar(bit)
     error('mylloyds:NonScalarBIT','Bit parameter must be a scalar.');
 elseif ~isreal(bit) || ~(bit == fix(bit)) || (bit < 1)
     error('mylloyds:InvalidBIT',['Bit parameter must be a positive ', ...
                         'integer.']);
-else
-    if nargin < 2 || isempty(tol)
-        tol = 10^(-7);
+elseif ~isempty(ini_codebook)
+    if ~(length(ini_codebook) == 2^bit)
+        error('mylloyds:InvalidINI_CODEBOOK','Invalid initial codebook parameter specified.')
     end;
+    % initial half of codebook for CAREFULLY specified initial codebook
+    % parameter (NOT for all possible initial codebook parameter)
+    len_codebook_half = 2^bit / 2;
+    codebook = sort(ini_codebook);
+    codebook_half = codebook(len_codebook_half+1:2^bit);
+else
+    % initial half of codebook for empty initial codebook parameter
+    len_codebook_half = 2^bit / 2;
+    codebook_half = linspace(0.03, 4, len_codebook_half);
 end;
 
-% initial half of codebook for the standard Gaussian distribution
-len_codebook_half = 2^bit / 2;
-codebook_half = linspace(0.03, 4, len_codebook_half);
+if nargin < 2 || isempty(tol)
+    tol = 10^(-7);
+end;
 
 % initial half of partition
 partition_half = (codebook_half(2 : len_codebook_half) + codebook_half(1 : len_codebook_half-1)) / 2;
@@ -87,7 +98,7 @@ partition = [-inf, -fliplr(partition_half), 0, partition_half, inf];
 codebook = [-fliplr(codebook_half), codebook_half];
 
 % plot
-if (nargin > 2) && plot_flag
+if (nargin > 3) && plot_flag
     x_len = 5;
     partition_plot = [-fliplr(partition_half), 0, partition_half];
     x = -x_len:0.01:x_len;
