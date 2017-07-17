@@ -22,7 +22,7 @@ function [partition, codebook, distor, rel_distor] = lloyds(training_set, ini_co
 %
 %   See also QUANTIZ, DPCMOPT.
 
-%   Copyright 1996-2005 The MathWorks, Inc.
+%   Copyright 1996-2005 The MathWorks, Inc. (MATLAB R2009a)
 %   $Revision: 1.15.4.3 $ $Date: 2005/06/27 22:16:58 $
 
 % validation verification and format conversion.
