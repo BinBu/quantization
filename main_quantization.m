@@ -19,7 +19,7 @@ lloydsfile = ['lloyds_', num2str(bit), 'bit'];
 load(lloydsfile, 'codebook'); % comment if no such file exists
 
 % Lloyd quantization for the standard Gaussian distribution
-[partition, codebook, distor, rel_distor] = mylloyds1(bit, codebook, tol, plot_flag);
+[partition, codebook, distor, rel_distor] = mylloyds(bit, codebook, tol, plot_flag);
 
 % save the codebook and partition in the file (.mat), or overwrite it if it
 % already exists
