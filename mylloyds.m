@@ -19,7 +19,7 @@ function [partition, codebook, distor, rel_distor] = mylloyds(bit, ini_codebook,
 %   [PARTITION, CODEBOOK, DISTORTION, REL_DISTORTION] = MYLLOYDS(...) outputs the
 %   relative distortion value in terminating the computation.
 
-%   Written by Bin Hu in MATLAB R2014a, learned from lloyds.m (Copyright 1996-2005 The MathWorks, Inc.) in MATLAB.
+%   Written by Bin Hu in MATLAB R2014a, learned from lloyds.m (Copyright 1996-2005 The MathWorks, Inc.) in MATLAB R2009a.
 %   $Revision: 1.1.0.0 $ $Date: 2017/07/15 $
 
 % validation verification and format conversion.
