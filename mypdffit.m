@@ -1,4 +1,4 @@
-function pd = mypdffit(data,nbins,dist)
+function [pd, entropy_data] = mypdffit(data,nbins,dist)
 %MYPDFFIT Fit probability distribution to data.
 %   MYPDFFIT(DATA,NBINS) plots a pdf of the values in the vector DATA,
 %   along with a normal density function with parameters estimated from the
@@ -32,9 +32,12 @@ function pd = mypdffit(data,nbins,dist)
 %   PD = MYPDFFIT(...) returns an object PD representing
 %   the fitted distribution. PD is an object in a class derived from the
 %   ProbDist class.
+%
+%   [PD, ENTROPY_DATA] = MYPDFFIT(...) outputs the entropy of the values in
+%   the vector DATA.
 
 %   Written by Bin Hu in MATLAB R2009a, learned from histfit.m (Copyright 1993-2008 The MathWorks, Inc.) in MATLAB R2009a. 
-%   $Revision: 1.0.0.0 $  $Date: 2017/07/18 $
+%   $Revision: 1.1.0.0 $  $Date: 2017/07/18 $
 
 % validation verification and format conversion.
 if ~isvector(data)
@@ -59,6 +62,12 @@ end
 binwidth = bincenters(2) - bincenters(1); % Finds the width of each bin
 y_data = bincounts / (n * binwidth); % Normalize the density
 plot(bincenters,y_data,'b-','LineWidth',2);
+
+% Compute the entropy of data
+p_data = bincounts / n;
+vec_pp = p_data .* log2(p_data);
+vec_pp(isnan(vec_pp)) = [];
+entropy_data = -sum(vec_pp);
 
 % Fit distribution to data
 if nargin<3 || isempty(dist)
