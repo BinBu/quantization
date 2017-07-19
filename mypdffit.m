@@ -37,7 +37,7 @@ function [pd, entropy_data] = mypdffit(data,nbins,dist)
 %   the vector DATA.
 
 %   Written by Bin Hu in MATLAB R2009a, learned from histfit.m (Copyright 1993-2008 The MathWorks, Inc.) in MATLAB R2009a. 
-%   $Revision: 1.1.0.0 $  $Date: 2017/07/18 $
+%   $Revision: 1.1.1.0 $  $Date: 2017/07/19 $
 
 % validation verification and format conversion.
 if ~isvector(data)
@@ -55,8 +55,16 @@ elseif ~isscalar(nbins) || ~isnumeric(nbins) || ~isfinite(nbins) ...
     error('stats:histfit:BadNumBins','NBINS must be a positive integer.')
 end
 
+% Find the range of the data for plotting
+min_plot = 0.0005;
+max_plot = 0.9995;
+data = sort(data);
+minindex_data_plot = ceil(n * min_plot) - 1;
+maxindex_data_plot = ceil(n * max_plot);
+data_plot = data(minindex_data_plot:maxindex_data_plot);
+
 % Do histogram calculations
-[bincounts,bincenters]=hist(data,nbins);
+[bincounts,bincenters]=hist(data_plot,nbins);
 
 % Plot the pdf of the values in the vector data
 binwidth = bincenters(2) - bincenters(1); % Finds the width of each bin
@@ -64,7 +72,7 @@ y_data = bincounts / (n * binwidth); % Normalize the density
 plot(bincenters,y_data,'b-','LineWidth',2);
 
 % Compute the entropy of data
-p_data = bincounts / n;
+p_data = [minindex_data_plot - 1, bincounts, n - maxindex_data_plot] / n;
 vec_pp = p_data .* log2(p_data);
 vec_pp(isnan(vec_pp)) = [];
 entropy_data = -sum(vec_pp);
@@ -74,7 +82,7 @@ if nargin<3 || isempty(dist)
     dist = 'normal';
 end
 try
-    pd = fitdist(data,dist);
+    pd = fitdist(data_plot,dist);
 catch myException
     if isequal(myException.identifier,'stats:ProbDistUnivParam:fit:NRequired')
         % Binomial is not allowed because we have no N parameter
@@ -87,7 +95,9 @@ catch myException
 end
 
 % Find range for plotting
-q = icdf(pd,[0.0013499 0.99865]); % three-sigma range for normal distribution
+min_prob = 0.0013499;
+max_prob = 0.99865;
+q = icdf(pd,[min_prob, max_prob]); % three-sigma range for normal distribution
 x = linspace(q(1),q(2));
 if ~pd.Support.iscontinuous
     % For discrete distribution use only integers
